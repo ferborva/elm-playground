@@ -1,0 +1,30 @@
+{
+  "name": "elm-playground",
+  "version": "0.0.0",
+  "description": "Elm Playground",
+  "main": "index.js",
+  "dependencies": {
+    "cz-conventional-changelog": "^2.0.0"
+  },
+  "devDependencies": {
+    "cz-conventional-changelog": "^2.0.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ferborva/elm-playground.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ferborva/elm-playground/issues"
+  },
+  "homepage": "https://github.com/ferborva/elm-playground#readme",
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
+  }
+}
