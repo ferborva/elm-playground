@@ -9048,11 +9048,83 @@ var _ferborva$elm_lab$Main$fetchRandomQuoteCompleted = F2(
 			return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 		}
 	});
+var _ferborva$elm_lab$Main$tokenDecoder = A2(_elm_lang$core$Json_Decode$field, 'id_token', _elm_lang$core$Json_Decode$string);
+var _ferborva$elm_lab$Main$getTokenCompleted = F2(
+	function (model, result) {
+		var _p1 = result;
+		if (_p1.ctor === 'Ok') {
+			return {
+				ctor: '_Tuple2',
+				_0: A2(
+					_elm_lang$core$Debug$log,
+					'Got a new token!',
+					_elm_lang$core$Native_Utils.update(
+						model,
+						{token: _p1._0, password: '', errorMsg: ''})),
+				_1: _elm_lang$core$Platform_Cmd$none
+			};
+		} else {
+			return {
+				ctor: '_Tuple2',
+				_0: _elm_lang$core$Native_Utils.update(
+					model,
+					{
+						errorMsg: _elm_lang$core$Basics$toString(_p1._0)
+					}),
+				_1: _elm_lang$core$Platform_Cmd$none
+			};
+		}
+	});
+var _ferborva$elm_lab$Main$userEncoder = function (model) {
+	return _elm_lang$core$Json_Encode$object(
+		{
+			ctor: '::',
+			_0: {
+				ctor: '_Tuple2',
+				_0: 'username',
+				_1: _elm_lang$core$Json_Encode$string(model.username)
+			},
+			_1: {
+				ctor: '::',
+				_0: {
+					ctor: '_Tuple2',
+					_0: 'password',
+					_1: _elm_lang$core$Json_Encode$string(model.password)
+				},
+				_1: {ctor: '[]'}
+			}
+		});
+};
+var _ferborva$elm_lab$Main$authUser = F2(
+	function (model, authUrl) {
+		var body = _elm_lang$http$Http$jsonBody(
+			_ferborva$elm_lab$Main$userEncoder(model));
+		return A3(_elm_lang$http$Http$post, authUrl, body, _ferborva$elm_lab$Main$tokenDecoder);
+	});
 var _ferborva$elm_lab$Main$api = 'http://localhost:3001/';
+var _ferborva$elm_lab$Main$registerUrl = A2(_elm_lang$core$Basics_ops['++'], _ferborva$elm_lab$Main$api, 'users');
 var _ferborva$elm_lab$Main$randomQuoteUrl = A2(_elm_lang$core$Basics_ops['++'], _ferborva$elm_lab$Main$api, 'api/random-quote');
 var _ferborva$elm_lab$Main$fetchRandomQuote = _elm_lang$http$Http$getString(_ferborva$elm_lab$Main$randomQuoteUrl);
-var _ferborva$elm_lab$Main$Model = function (a) {
-	return {quote: a};
+var _ferborva$elm_lab$Main$Model = F5(
+	function (a, b, c, d, e) {
+		return {quote: a, username: b, token: c, password: d, errorMsg: e};
+	});
+var _ferborva$elm_lab$Main$GetTokenCompleted = function (a) {
+	return {ctor: 'GetTokenCompleted', _0: a};
+};
+var _ferborva$elm_lab$Main$authUserCmd = F2(
+	function (model, authUrl) {
+		return A2(
+			_elm_lang$http$Http$send,
+			_ferborva$elm_lab$Main$GetTokenCompleted,
+			A2(_ferborva$elm_lab$Main$authUser, model, authUrl));
+	});
+var _ferborva$elm_lab$Main$ClickRegisterUser = {ctor: 'ClickRegisterUser'};
+var _ferborva$elm_lab$Main$SetPassword = function (a) {
+	return {ctor: 'SetPassword', _0: a};
+};
+var _ferborva$elm_lab$Main$SetUsername = function (a) {
+	return {ctor: 'SetUsername', _0: a};
 };
 var _ferborva$elm_lab$Main$FetchRandomQuoteCompleted = function (a) {
 	return {ctor: 'FetchRandomQuoteCompleted', _0: a};
@@ -9060,20 +9132,314 @@ var _ferborva$elm_lab$Main$FetchRandomQuoteCompleted = function (a) {
 var _ferborva$elm_lab$Main$fetchRandomQuoteCmd = A2(_elm_lang$http$Http$send, _ferborva$elm_lab$Main$FetchRandomQuoteCompleted, _ferborva$elm_lab$Main$fetchRandomQuote);
 var _ferborva$elm_lab$Main$init = {
 	ctor: '_Tuple2',
-	_0: _ferborva$elm_lab$Main$Model(''),
+	_0: A5(_ferborva$elm_lab$Main$Model, '', '', '', '', ''),
 	_1: _ferborva$elm_lab$Main$fetchRandomQuoteCmd
 };
 var _ferborva$elm_lab$Main$update = F2(
 	function (msg, model) {
-		var _p1 = msg;
-		if (_p1.ctor === 'GetQuote') {
-			return {ctor: '_Tuple2', _0: model, _1: _ferborva$elm_lab$Main$fetchRandomQuoteCmd};
-		} else {
-			return A2(_ferborva$elm_lab$Main$fetchRandomQuoteCompleted, model, _p1._0);
+		var _p2 = msg;
+		switch (_p2.ctor) {
+			case 'GetQuote':
+				return {ctor: '_Tuple2', _0: model, _1: _ferborva$elm_lab$Main$fetchRandomQuoteCmd};
+			case 'FetchRandomQuoteCompleted':
+				return A2(_ferborva$elm_lab$Main$fetchRandomQuoteCompleted, model, _p2._0);
+			case 'SetUsername':
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{username: _p2._0}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			case 'SetPassword':
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{password: _p2._0}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			case 'ClickRegisterUser':
+				return {
+					ctor: '_Tuple2',
+					_0: model,
+					_1: A2(_ferborva$elm_lab$Main$authUserCmd, model, _ferborva$elm_lab$Main$registerUrl)
+				};
+			default:
+				return A2(_ferborva$elm_lab$Main$getTokenCompleted, model, _p2._0);
 		}
 	});
 var _ferborva$elm_lab$Main$GetQuote = {ctor: 'GetQuote'};
 var _ferborva$elm_lab$Main$view = function (model) {
+	var logged = (_elm_lang$core$Native_Utils.cmp(
+		_elm_lang$core$String$length(model.token),
+		0) > 0) ? true : false;
+	var authBoxView = function () {
+		var greeting = A2(
+			_elm_lang$core$Basics_ops['++'],
+			'Hello ',
+			A2(_elm_lang$core$Basics_ops['++'], model.username, '!'));
+		var showError = _elm_lang$core$String$isEmpty(model.errorMsg) ? 'hidden' : '';
+		return logged ? A2(
+			_elm_lang$html$Html$div,
+			{
+				ctor: '::',
+				_0: _elm_lang$html$Html_Attributes$id('greeting'),
+				_1: {ctor: '[]'}
+			},
+			{
+				ctor: '::',
+				_0: A2(
+					_elm_lang$html$Html$h3,
+					{
+						ctor: '::',
+						_0: _elm_lang$html$Html_Attributes$class('text-center'),
+						_1: {ctor: '[]'}
+					},
+					{
+						ctor: '::',
+						_0: _elm_lang$html$Html$text(greeting),
+						_1: {ctor: '[]'}
+					}),
+				_1: {
+					ctor: '::',
+					_0: A2(
+						_elm_lang$html$Html$p,
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html_Attributes$class('text-center'),
+							_1: {ctor: '[]'}
+						},
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html$text('You have super secret access to protected quotes :)'),
+							_1: {ctor: '[]'}
+						}),
+					_1: {ctor: '[]'}
+				}
+			}) : A2(
+			_elm_lang$html$Html$div,
+			{
+				ctor: '::',
+				_0: _elm_lang$html$Html_Attributes$id('form'),
+				_1: {ctor: '[]'}
+			},
+			{
+				ctor: '::',
+				_0: A2(
+					_elm_lang$html$Html$h2,
+					{
+						ctor: '::',
+						_0: _elm_lang$html$Html_Attributes$class('text-center'),
+						_1: {ctor: '[]'}
+					},
+					{
+						ctor: '::',
+						_0: _elm_lang$html$Html$text('Log in or Register'),
+						_1: {ctor: '[]'}
+					}),
+				_1: {
+					ctor: '::',
+					_0: A2(
+						_elm_lang$html$Html$p,
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html_Attributes$class('help-block'),
+							_1: {ctor: '[]'}
+						},
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html$text('If you already have and account, use your username and password. Otherwise, enter you desired account details and click Register.'),
+							_1: {ctor: '[]'}
+						}),
+					_1: {
+						ctor: '::',
+						_0: A2(
+							_elm_lang$html$Html$div,
+							{
+								ctor: '::',
+								_0: _elm_lang$html$Html_Attributes$class('showError'),
+								_1: {ctor: '[]'}
+							},
+							{
+								ctor: '::',
+								_0: A2(
+									_elm_lang$html$Html$div,
+									{
+										ctor: '::',
+										_0: _elm_lang$html$Html_Attributes$class('alert alert-danget'),
+										_1: {ctor: '[]'}
+									},
+									{
+										ctor: '::',
+										_0: _elm_lang$html$Html$text(model.errorMsg),
+										_1: {ctor: '[]'}
+									}),
+								_1: {ctor: '[]'}
+							}),
+						_1: {
+							ctor: '::',
+							_0: A2(
+								_elm_lang$html$Html$div,
+								{
+									ctor: '::',
+									_0: _elm_lang$html$Html_Attributes$class('form-group row'),
+									_1: {ctor: '[]'}
+								},
+								{
+									ctor: '::',
+									_0: A2(
+										_elm_lang$html$Html$div,
+										{
+											ctor: '::',
+											_0: _elm_lang$html$Html_Attributes$class('col-md-offset-2 col-md-8'),
+											_1: {ctor: '[]'}
+										},
+										{
+											ctor: '::',
+											_0: A2(
+												_elm_lang$html$Html$label,
+												{
+													ctor: '::',
+													_0: _elm_lang$html$Html_Attributes$for('username'),
+													_1: {ctor: '[]'}
+												},
+												{
+													ctor: '::',
+													_0: _elm_lang$html$Html$text('Username:'),
+													_1: {ctor: '[]'}
+												}),
+											_1: {
+												ctor: '::',
+												_0: A2(
+													_elm_lang$html$Html$input,
+													{
+														ctor: '::',
+														_0: _elm_lang$html$Html_Attributes$id('username'),
+														_1: {
+															ctor: '::',
+															_0: _elm_lang$html$Html_Attributes$type_('username'),
+															_1: {
+																ctor: '::',
+																_0: _elm_lang$html$Html_Attributes$class('form-control'),
+																_1: {
+																	ctor: '::',
+																	_0: _elm_lang$html$Html_Attributes$value(model.username),
+																	_1: {
+																		ctor: '::',
+																		_0: _elm_lang$html$Html_Events$onInput(_ferborva$elm_lab$Main$SetUsername),
+																		_1: {ctor: '[]'}
+																	}
+																}
+															}
+														}
+													},
+													{ctor: '[]'}),
+												_1: {ctor: '[]'}
+											}
+										}),
+									_1: {ctor: '[]'}
+								}),
+							_1: {
+								ctor: '::',
+								_0: A2(
+									_elm_lang$html$Html$div,
+									{
+										ctor: '::',
+										_0: _elm_lang$html$Html_Attributes$class('form-group row'),
+										_1: {ctor: '[]'}
+									},
+									{
+										ctor: '::',
+										_0: A2(
+											_elm_lang$html$Html$div,
+											{
+												ctor: '::',
+												_0: _elm_lang$html$Html_Attributes$class('col-md-offset-2 col-md-8'),
+												_1: {ctor: '[]'}
+											},
+											{
+												ctor: '::',
+												_0: A2(
+													_elm_lang$html$Html$label,
+													{
+														ctor: '::',
+														_0: _elm_lang$html$Html_Attributes$for('password'),
+														_1: {ctor: '[]'}
+													},
+													{
+														ctor: '::',
+														_0: _elm_lang$html$Html$text('Password:'),
+														_1: {ctor: '[]'}
+													}),
+												_1: {
+													ctor: '::',
+													_0: A2(
+														_elm_lang$html$Html$input,
+														{
+															ctor: '::',
+															_0: _elm_lang$html$Html_Attributes$id('password'),
+															_1: {
+																ctor: '::',
+																_0: _elm_lang$html$Html_Attributes$type_('password'),
+																_1: {
+																	ctor: '::',
+																	_0: _elm_lang$html$Html_Attributes$class('form-control'),
+																	_1: {
+																		ctor: '::',
+																		_0: _elm_lang$html$Html_Attributes$value(model.password),
+																		_1: {
+																			ctor: '::',
+																			_0: _elm_lang$html$Html_Events$onInput(_ferborva$elm_lab$Main$SetPassword),
+																			_1: {ctor: '[]'}
+																		}
+																	}
+																}
+															}
+														},
+														{ctor: '[]'}),
+													_1: {ctor: '[]'}
+												}
+											}),
+										_1: {ctor: '[]'}
+									}),
+								_1: {
+									ctor: '::',
+									_0: A2(
+										_elm_lang$html$Html$div,
+										{
+											ctor: '::',
+											_0: _elm_lang$html$Html_Attributes$class('text-center'),
+											_1: {ctor: '[]'}
+										},
+										{
+											ctor: '::',
+											_0: A2(
+												_elm_lang$html$Html$button,
+												{
+													ctor: '::',
+													_0: _elm_lang$html$Html_Attributes$class('btn btn-link'),
+													_1: {
+														ctor: '::',
+														_0: _elm_lang$html$Html_Events$onClick(_ferborva$elm_lab$Main$ClickRegisterUser),
+														_1: {ctor: '[]'}
+													}
+												},
+												{
+													ctor: '::',
+													_0: _elm_lang$html$Html$text('Register'),
+													_1: {ctor: '[]'}
+												}),
+											_1: {ctor: '[]'}
+										}),
+									_1: {ctor: '[]'}
+								}
+							}
+						}
+					}
+				}
+			});
+	}();
 	return A2(
 		_elm_lang$html$Html$div,
 		{
@@ -9141,7 +9507,22 @@ var _ferborva$elm_lab$Main$view = function (model) {
 								}),
 							_1: {ctor: '[]'}
 						}),
-					_1: {ctor: '[]'}
+					_1: {
+						ctor: '::',
+						_0: A2(
+							_elm_lang$html$Html$div,
+							{
+								ctor: '::',
+								_0: _elm_lang$html$Html_Attributes$class('jumbotron text-left'),
+								_1: {ctor: '[]'}
+							},
+							{
+								ctor: '::',
+								_0: authBoxView,
+								_1: {ctor: '[]'}
+							}),
+						_1: {ctor: '[]'}
+					}
 				}
 			}
 		});
@@ -9150,7 +9531,7 @@ var _ferborva$elm_lab$Main$main = _elm_lang$html$Html$program(
 	{
 		init: _ferborva$elm_lab$Main$init,
 		update: _ferborva$elm_lab$Main$update,
-		subscriptions: function (_p2) {
+		subscriptions: function (_p3) {
 			return _elm_lang$core$Platform_Sub$none;
 		},
 		view: _ferborva$elm_lab$Main$view
