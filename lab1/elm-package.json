@@ -2,6 +2,7 @@
     "version": "1.0.0",
     "summary": "Simple project to work with basic ELM architecture",
     "license": "MIT",
+    "repository": "https://github.com/ferborva/elm-lab.git",
     "source-directories": [
         "src",
         "dist"
